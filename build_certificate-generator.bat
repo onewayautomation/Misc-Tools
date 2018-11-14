@@ -17,7 +17,7 @@ set INSTALLDIR=%~dp0
 set GIT=C:\Program Files (x86)\Git\bin\git.exe
 set SIGNTOOL=C:\Build\sign_output.bat
 
-IF "%1"=="no-clean" and EXIST %INSTALLDIR%\third-party\openssl GOTO noClean
+IF "%1"=="no-clean" (IF EXIST %INSTALLDIR%\third-party\openssl GOTO noClean)
 
 ECHO STEP 1) Deleting Output Directories
 IF EXIST %INSTALLDIR%\bin rmdir /s /q %INSTALLDIR%\bin
