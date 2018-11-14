@@ -1,8 +1,15 @@
 @ECHO off
 REM ****************************************************************************************************************
 REM ** This script builds the CertificateGenerator.
-REM ** This must be run from a Visual Studio command line.
 REM ****************************************************************************************************************
+REM SET vc_bat_name1="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat"
+SET vc_bat_name="C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
+@echo on
+IF EXIST %vc_bat_name% GOTO VC1
+echo Failed to find Visual Studio batch file to setup environment.
+exit
+:VC1
+
 SETLOCAL
 
 set SRCDIR=%~dp0
@@ -10,7 +17,8 @@ set INSTALLDIR=%~dp0
 set GIT=C:\Program Files (x86)\Git\bin\git.exe
 set SIGNTOOL=C:\Build\sign_output.bat
 
-IF "%1"=="no-clean" GOTO noClean
+IF "%1"=="no-clean" and EXIST %INSTALLDIR%\third-party\openssl GOTO noClean
+
 ECHO STEP 1) Deleting Output Directories
 IF EXIST %INSTALLDIR%\bin rmdir /s /q %INSTALLDIR%\bin
 IF EXIST %INSTALLDIR%\build rmdir /s /q %INSTALLDIR%\build
@@ -27,8 +35,6 @@ cd %SRCDIR%
 "%GIT%" submodule update --init --recursive
 "%GIT%" pull
 
-PAUSE
-
 ECHO STEP 3) Building OpenSSL
 cd %SRCDIR%\third-party
 CALL build_openssl.bat
@@ -36,7 +42,7 @@ CALL build_openssl.bat
 
 ECHO STEP 4) Building CertificateGenerator
 cd %SRCDIR%
-IF %BUILD_NUMBER% GTR 0 ECHO #define BUILD_NUMBER %BUILD_NUMBER% > CertificateGenerator\BuildVersion.h
+IF DEFINED BUILD_NUMBER ECHO #define BUILD_NUMBER %BUILD_NUMBER% > CertificateGenerator\BuildVersion.h
 msbuild "CertificateGenerator Solution.sln" /p:Configuration=Release 
 
 ECHO STEP 5) Sign the Binaries
