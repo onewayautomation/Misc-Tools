@@ -1,17 +1,23 @@
-@ECHO off
+@ECHO
 REM ****************************************************************************************************************
 REM ** This script builds the CertificateGenerator.
 REM ****************************************************************************************************************
+
+REM check if the msbuild command is available. If not, try to call the script which sets Visual C++ environment variables.
+where msbuild >nul 2>nul
+IF %ERRORLEVEL% == 0 GOTO VCOK
+
 REM SET vc_bat_name1="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat"
 SET vc_bat_name="C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
-@echo on
-IF EXIST %vc_bat_name% GOTO VC1
+IF EXIST %vc_bat_name% GOTO CMDOK
 echo Failed to find Visual Studio batch file to setup environment.
 exit
-:VC1
 
+:CMDOK
+call %vc_bat_name% x86
+
+:VCOK	
 SETLOCAL
-
 set SRCDIR=%~dp0
 set INSTALLDIR=%~dp0
 set GIT=C:\Program Files (x86)\Git\bin\git.exe
